@@ -1,5 +1,5 @@
 $(function () {
-    $('#container').highcharts({
+    Highcharts.chart('container', {
 
         chart: {
             type: 'boxplot'
@@ -62,7 +62,7 @@ $(function () {
             ],
             marker: {
                 fillColor: 'white',
-                lineWidth: 1,
+                lineWidth: 1
                 //lineColor: Highcharts.getOptions().colors[0]
             },
             tooltip: {

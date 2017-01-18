@@ -3,14 +3,14 @@ $(function () {
     $.getJSON('https://www.highcharts.com/samples/data/jsonp.php?filename=world-population-density.json&callback=?', function (data) {
 
         // Initiate the chart
-        $('#container').highcharts('Map', {
+        Highcharts.mapChart('container', {
 
             chart: {
                 backgroundColor: '#4b96af'
             },
 
-            title : {
-                text : 'Chart with a background color',
+            title: {
+                text: 'Chart with a background color',
                 style: {
                     color: 'white'
                 }
@@ -38,8 +38,8 @@ $(function () {
                 backgroundColor: 'rgba(255,255,255,0.85)'
             },
 
-            series : [{
-                data : data,
+            series: [{
+                data: data,
                 mapData: Highcharts.maps['custom/world'],
                 joinBy: ['iso-a2', 'code'],
                 name: 'Population density',
@@ -47,7 +47,7 @@ $(function () {
                 borderWidth: 0.5,
                 states: {
                     hover: {
-                        color: '#BADA55'
+                        color: '#a4edba'
                     }
                 },
                 tooltip: {

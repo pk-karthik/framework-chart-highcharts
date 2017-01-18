@@ -7,17 +7,13 @@ $(function () {
         numberFormat = Highcharts.numberFormat,
         pInt = Highcharts.pInt,
         setOptions = Highcharts.setOptions,
-        splat = Highcharts.splat,
-        stableSort = Highcharts.stabeSort;
+        splat = Highcharts.splat;
 
     /**
      * Wrapper because of fast migration from earlier system
      */
     function assertEquals(assert, message, actual, expected) {
         assert.equal(expected, actual, message);
-    }
-    function assertUndefined(assert, message, actual) {
-        assert.strictEqual(undefined, actual, message);
     }
 
     function countMembers(obj) {
@@ -180,7 +176,7 @@ $(function () {
         assertEquals(assert, "splat object", 1, splat({}).length);
 
         // test with array
-        assertEquals(assert, "splat array", 3, splat([1,2,3]).length);
+        assertEquals(assert, "splat array", 3, splat([1, 2, 3]).length);
     });
 
 /*
@@ -271,6 +267,8 @@ $(function () {
         assertEquals(assert, 'Rounding negative (#4573)', "-342 000.00", numberFormat(-342000, 2));
         assertEquals(assert, 'String decimal count', "2 016", numberFormat(2016, '0'));
         assertEquals(assert, 'Rounding', "2.0", numberFormat(1.96, 1));
+        assertEquals(assert, 'Rounding', "1.00", numberFormat(0.995, 2));
+        assertEquals(assert, 'Rounding', "-1.00", numberFormat(-0.995, 2));
     });
 
 
@@ -414,7 +412,7 @@ $(function () {
             'number with decimals (0.12) returns true'
         );
         assert.strictEqual(
-            isNumber(.12),
+            isNumber(0.12),
             true,
             'number with only decimals (.12) returns true'
         );
@@ -430,5 +428,102 @@ $(function () {
         );
     });
 
+    QUnit.test('wrap', function (assert) {
+        var Person = function (name) {
+            this.name = name;
+        };
+        Person.prototype.setName = function (name) {
+            this.name = name;
+        };
+
+        var person = new Person('Torstein');
+        assert.strictEqual(
+            person.name,
+            'Torstein',
+            'Initial value'
+        );
+
+        person.setName('Torstein Honsi');
+        assert.strictEqual(
+            person.name,
+            'Torstein Honsi',
+            'Initial value'
+        );
+
+        Highcharts.wrap(Person.prototype, 'setName', function (proceed) {
+            proceed.apply(this, Array.prototype.slice.call(arguments, 1));
+            this.name += ' Extended';
+        });
+        person.setName('Torstein');
+
+        assert.strictEqual(
+            person.name,
+            'Torstein Extended',
+            'Wrapped'
+        );
+
+        // Wrap using this.proceed() with no arguments
+        Person.prototype.setAge = function (age) {
+            this.age = age;
+        };
+        person.setAge(42);
+        assert.strictEqual(
+            person.age,
+            42,
+            'Initial age'
+        );
+
+        Highcharts.wrap(Person.prototype, 'setAge', function () {
+            this.proceed();
+            this.age += 1;
+        });
+        person.setAge(43);
+        assert.strictEqual(
+            person.age,
+            44,
+            'Wrapped age'
+        );
+
+
+        // Wrap with this.proceed() with modified arguments
+        Person.prototype.setHeight = function (height) {
+            this.height = height;
+        };
+        person.setHeight(188);
+        assert.strictEqual(
+            person.height,
+            188,
+            'Initial height'
+        );
+
+        Highcharts.wrap(Person.prototype, 'setHeight', function (proceed, height) {
+            this.proceed(height + 1);
+        });
+        person.setHeight(189);
+        assert.strictEqual(
+            person.height,
+            190,
+            'Wrapped height'
+        );
+    });
+
+    QUnit.test('find', function (assert) {
+
+        assert.strictEqual(
+            Highcharts.find([1, 2, 3, 4, 5], function (item) {
+                return item >= 3;
+            }),
+            3,
+            'Returns first item'
+        );
+
+        assert.deepEqual(
+            Highcharts.find([1, 2, { id: 'findMe' }, 4, 5], function (item) {
+                return item && item.id === 'findMe';
+            }),
+            { id: 'findMe' },
+            'Returns first item'
+        );
+    });
 
 });

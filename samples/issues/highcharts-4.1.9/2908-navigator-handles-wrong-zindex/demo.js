@@ -1,7 +1,7 @@
 
 $(function () {
     QUnit.test("Handles should not be overlapped by xAxis labels", function (assert) {
-        var chart = $('#container').highcharts('StockChart',{
+        var chart = $('#container').highcharts('StockChart', {
             navigator: {
                 height: 20
             },
@@ -12,7 +12,7 @@ $(function () {
 
 
         assert.strictEqual(
-            chart.scroller.handles[0].zIndex > chart.scroller.xAxis.labelGroup.zIndex,
+            chart.scroller.handles[0].zIndex >= chart.scroller.xAxis.labelGroup.zIndex,
             true,
             "Labels no overlap handles"
         );

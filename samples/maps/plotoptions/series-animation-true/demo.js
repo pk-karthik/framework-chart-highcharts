@@ -3,7 +3,7 @@ $(function () {
     $.getJSON('https://www.highcharts.com/samples/data/jsonp.php?filename=world-population-density.json&callback=?', function (data) {
 
         // Initiate the chart
-        $('#container').highcharts('Map', {
+        Highcharts.mapChart('container', {
 
             title: {
                 text: 'Initial series animation enabled'
@@ -28,16 +28,16 @@ $(function () {
                 type: 'logarithmic'
             },
 
-            series : [{
+            series: [{
                 animation: true,
-                data : data,
+                data: data,
                 mapData: Highcharts.maps['custom/world'],
                 joinBy: ['iso-a2', 'code'],
                 name: 'Population density',
                 allowPointSelect: true,
                 states: {
                     hover: {
-                        color: '#BADA55'
+                        color: '#a4edba'
                     },
                     select: {
                         color: 'black'

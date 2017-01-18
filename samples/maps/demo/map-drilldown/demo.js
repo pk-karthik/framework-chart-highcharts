@@ -18,8 +18,8 @@ $(function () {
     });
 
     // Instanciate the map
-    $('#container').highcharts('Map', {
-        chart : {
+    Highcharts.mapChart('container', {
+        chart: {
             events: {
                 drilldown: function (e) {
 
@@ -73,8 +73,8 @@ $(function () {
             }
         },
 
-        title : {
-            text : 'Highcharts Map Drilldown'
+        title: {
+            text: 'Highcharts Map Drilldown'
         },
 
         subtitle: {
@@ -116,8 +116,8 @@ $(function () {
             }
         },
 
-        series : [{
-            data : data,
+        series: [{
+            data: data,
             name: 'USA',
             dataLabels: {
                 enabled: true,
@@ -126,11 +126,10 @@ $(function () {
         }],
 
         drilldown: {
-            //series: drilldownSeries,
             activeDataLabelStyle: {
                 color: '#FFFFFF',
                 textDecoration: 'none',
-                textShadow: '0 0 3px #000000'
+                textOutline: '1px #000000'
             },
             drillUpButton: {
                 relativeTo: 'spacingBox',

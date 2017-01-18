@@ -22,10 +22,10 @@ $(function () {
 
 
     // Initiate the chart
-    $('#container').highcharts('Map', {
+    Highcharts.mapChart('container', {
 
-        title : {
-            text : 'Data joined by <em>iso-a2</em> and <em>code</em>'
+        title: {
+            text: 'Data joined by <em>iso-a2</em> and <em>code</em>'
         },
 
         mapNavigation: {
@@ -37,14 +37,14 @@ $(function () {
 
         colorAxis: {},
 
-        series : [{
-            data : data,
+        series: [{
+            data: data,
             mapData: Highcharts.maps['custom/nordic-countries-core'],
             joinBy: ['iso-a2', 'code'],
             name: 'Random data',
             states: {
                 hover: {
-                    color: '#BADA55'
+                    color: '#a4edba'
                 }
             }
         }]

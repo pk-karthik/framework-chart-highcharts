@@ -87,7 +87,6 @@ $(function () {
             proceed.apply(this, Array.prototype.slice.call(arguments, 1));
 
             var points = mapChart.getSelectedPoints();
-
             if (points.length) {
                 if (points.length === 1) {
                     $('#info #flag').attr('class', 'flag ' + points[0].flag);
@@ -100,7 +99,7 @@ $(function () {
                 $('#info .subheader').html('<h4>Historical population</h4><small><em>Shift + Click on map to compare countries</em></small>');
 
                 if (!countryChart) {
-                    countryChart = $('#country-chart').highcharts({
+                    countryChart = Highcharts.chart('country-chart', {
                         chart: {
                             height: 250,
                             spacingLeft: 0
@@ -137,7 +136,7 @@ $(function () {
                                 pointStart: parseInt(categories[0], 10)
                             }
                         }
-                    }).highcharts();
+                    });
                 }
 
                 $.each(points, function (i) {
@@ -172,16 +171,13 @@ $(function () {
                     countryChart = countryChart.destroy();
                 }
             }
-
-
-
         });
 
         // Initiate the map chart
-        mapChart = $('#container').highcharts('Map', {
+        mapChart = Highcharts.mapChart('container', {
 
-            title : {
-                text : 'Population history by country'
+            title: {
+                text: 'Population history by country'
             },
 
             subtitle: {
@@ -206,8 +202,8 @@ $(function () {
                 footerFormat: '<span style="font-size: 10px">(Click for details)</span>'
             },
 
-            series : [{
-                data : data,
+            series: [{
+                data: data,
                 mapData: mapData,
                 joinBy: ['iso-a3', 'code3'],
                 name: 'Current population',
@@ -221,7 +217,7 @@ $(function () {
                     }
                 }
             }]
-        }).highcharts();
+        });
 
         // Pre-select a country
         mapChart.get('us').select();

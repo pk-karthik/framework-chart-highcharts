@@ -1,13 +1,13 @@
 $(function () {
-    QUnit.test("Apply minPointLength for a waterfall series" , function (assert) { 
+    QUnit.test("Apply minPointLength for a waterfall series", function (assert) {
         var len = 10,
             chart = $('#container').highcharts({
                 chart: {
                     type: 'waterfall',
                     animation: false
                 },
-                plotOptions:{
-                    series:{
+                plotOptions: {
+                    series: {
                         minPointLength: len
                     }
                 },
@@ -24,7 +24,7 @@ $(function () {
                         y: 1200
                     }, {
                         name: 'Positive Balance',
-                        isIntermediateSum: true,
+                        isIntermediateSum: true
                     }, {
                         name: 'Fixed Costs',
                         y: -342000
@@ -33,7 +33,7 @@ $(function () {
                         y: -233000
                     }, {
                         name: 'Balance',
-                        isSum: true,
+                        isSum: true
                     }]
                 }]
             }).highcharts(),
@@ -63,6 +63,32 @@ $(function () {
             parseInt(points[6].graphic.attr("height"), 10),
             "isSum point has proper height"
         );
+
+        chart.series[0].setData([
+            {
+                y: 2460
+            }, {
+                y: -6.1
+            }, {
+                y: -19.3
+            }, {
+                y: 1.3
+            }, {
+                y: -11.0
+            }, {
+                y: 23.6
+            }, {
+                y: 11.5
+            }, {
+                isSum: true
+            }
+        ]);
+
+        assert.strictEqual(
+            chart.series[0].points[0].graphic.attr('height'),
+            chart.series[0].points[7].graphic.attr('height'),
+            "Negative and positive offsets are equal."
+        );
     });
-    
+
 });

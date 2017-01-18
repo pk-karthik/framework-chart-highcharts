@@ -3,13 +3,13 @@ $(function () {
     $.getJSON('https://www.highcharts.com/samples/data/jsonp.php?filename=world-population-density.json&callback=?', function (data) {
 
         // Instanciate the map
-        $('#container').highcharts('Map', {
+        Highcharts.mapChart('container', {
             title: {
                 text: 'World population 2010 by country'
             },
 
-            subtitle : {
-                text : 'Demo of map button theming'
+            subtitle: {
+                text: 'Demo of map button theming'
             },
 
             legend: {
@@ -26,11 +26,11 @@ $(function () {
                         r: 0,
                         states: {
                             hover: {
-                                fill: '#bada55'
+                                fill: '#a4edba'
                             },
                             select: {
                                 stroke: '#039',
-                                fill: '#bada55'
+                                fill: '#a4edba'
                             }
                         }
                     },
@@ -46,7 +46,7 @@ $(function () {
                 type: 'logarithmic'
             },
 
-            series : [{
+            series: [{
                 name: 'Population',
                 mapData: Highcharts.maps['custom/world'],
                 data: data,

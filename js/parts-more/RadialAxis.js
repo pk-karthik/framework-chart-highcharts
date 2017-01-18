@@ -1,11 +1,39 @@
+/**
+ * (c) 2010-2016 Torstein Honsi
+ *
+ * License: www.highcharts.com/license
+ */
+'use strict';
+import H from '../parts/Globals.js';
+import '../parts/Utilities.js';
+import '../parts/Axis.js';
+import '../parts/CenteredSeriesMixin.js';
+import '../parts/Tick.js';
+import './Pane.js';
+var Axis = H.Axis,
+	CenteredSeriesMixin = H.CenteredSeriesMixin,
+	each = H.each,
+	extend = H.extend,
+	map = H.map,
+	merge = H.merge,
+	noop = H.noop,
+	Pane = H.Pane,
+	pick = H.pick,
+	pInt = H.pInt,
+	Tick = H.Tick,
+	splat = H.splat,
+	wrap = H.wrap,
+	
 
-var axisProto = Axis.prototype,
+	hiddenAxisMixin, // @todo Extract this to a new file
+	radialAxisMixin, // @todo Extract this to a new file
+	axisProto = Axis.prototype,
 	tickProto = Tick.prototype;
 
 /**
  * Augmented methods for the x axis in order to hide it completely, used for the X axis in gauges
  */
-var hiddenAxisMixin = {
+hiddenAxisMixin = {
 	getOffset: noop,
 	redraw: function () {
 		this.isDirty = false; // prevent setting Y axis dirty
@@ -21,9 +49,8 @@ var hiddenAxisMixin = {
 /**
  * Augmented methods for the value axis
  */
-var radialAxisMixin = {
-	isRadial: true,
-
+radialAxisMixin = {
+	
 	/**
 	 * The default options extend defaultYAxisOptions
 	 */
@@ -117,21 +144,30 @@ var radialAxisMixin = {
 	 * method.
 	 */
 	getLinePath: function (lineWidth, radius) {
-		var center = this.center;
-		radius = pick(radius, center[2] / 2 - this.offset);
+		var center = this.center,
+			end,
+			chart = this.chart,
+			r = pick(radius, center[2] / 2 - this.offset),
+			path;
 
-		return this.chart.renderer.symbols.arc(
-			this.left + center[0],
-			this.top + center[1],
-			radius,
-			radius,
-			{
-				start: this.startAngleRad,
-				end: this.endAngleRad,
-				open: true,
-				innerR: 0
-			}
-		);
+		if (this.isCircular || radius !== undefined) {
+			path = this.chart.renderer.symbols.arc(
+				this.left + center[0],
+				this.top + center[1],
+				r,
+				r,
+				{
+					start: this.startAngleRad,
+					end: this.endAngleRad,
+					open: true,
+					innerR: 0
+				}
+			);
+		} else {
+			end = this.postTranslate(this.angleRad, r);
+			path = ['M', center[0] + chart.plotLeft, center[1] + chart.plotTop, 'L', end.x, end.y];
+		}
+		return path;
 	},
 
 	/**
@@ -170,6 +206,11 @@ var radialAxisMixin = {
 	 * tickPositions are computed, so that ticks will extend passed the real max.
 	 */
 	beforeSetTickPositions: function () {
+		// If autoConnect is true, polygonal grid lines are connected, and one closestPointRange
+		// is added to the X axis to prevent the last point from overlapping the first.
+		this.autoConnect = this.isCircular && pick(this.userMax, this.options.max) === undefined &&
+			this.endAngleRad - this.startAngleRad === 2 * Math.PI;
+		
 		if (this.autoConnect) {
 			this.max += (this.categories && 1) || this.pointRange || this.closestPointRange || 0; // #1197, #2260
 		}
@@ -186,7 +227,7 @@ var radialAxisMixin = {
 		if (this.isRadial) {
 
 			// Set the center array
-			this.center = this.pane.center = Highcharts.CenteredSeriesMixin.getCenter.call(this.pane);
+			this.center = this.pane.center = CenteredSeriesMixin.getCenter.call(this.pane);
 
 			// The sector is used in Axis.translate to compute the translation of reversed axis points (#2570)
 			if (this.isCircular) {
@@ -206,7 +247,7 @@ var radialAxisMixin = {
 	 */
 	getPosition: function (value, length) {
 		return this.postTranslate(
-			this.isCircular ? this.translate(value) : 0, // #2848
+			this.isCircular ? this.translate(value) : this.angleRad, // #2848
 			pick(this.isCircular ? length : this.translate(value), this.center[2] / 2) - this.offset
 		);
 	},
@@ -240,6 +281,7 @@ var radialAxisMixin = {
 				options.innerRadius,
 				pick(options.thickness, 10)
 			],
+			offset = Math.min(this.offset, 0),
 			percentRegex = /%$/,
 			start,
 			end,
@@ -282,6 +324,8 @@ var radialAxisMixin = {
 				end = startAngleRad + this.translate(to);
 			}
 
+			radii[0] -= offset; // #5283
+			radii[2] -= offset; // #5283
 
 			ret = this.chart.renderer.symbols.arc(
 				this.left + center[0],
@@ -378,8 +422,6 @@ wrap(axisProto, 'init', function (proceed, chart, userOptions) {
 		isX = userOptions.isX,
 		isHidden = angular && isX,
 		isCircular,
-		startAngleRad,
-		endAngleRad,
 		options,
 		chartOptions = chart.options,
 		paneIndex = userOptions.pane || 0,
@@ -395,17 +437,19 @@ wrap(axisProto, 'init', function (proceed, chart, userOptions) {
 		}
 
 	} else if (polar) {
-		//extend(this, userOptions.isX ? radialAxisMixin : radialAxisMixin);
 		extend(this, radialAxisMixin);
 		isCircular = isX;
 		this.defaultRadialOptions = isX ? this.defaultRadialXOptions : merge(this.defaultYAxisOptions, this.defaultRadialYOptions);
-
+	
 	}
 
 	// Disable certain features on angular and polar axes
 	if (angular || polar) {
+		this.isRadial = true;
 		chart.inverted = false;
 		chartOptions.chart.zoomType = null;
+	} else {
+		this.isRadial = false;
 	}
 
 	// Run prototype.init
@@ -428,16 +472,13 @@ wrap(axisProto, 'init', function (proceed, chart, userOptions) {
 		// Start and end angle options are
 		// given in degrees relative to top, while internal computations are
 		// in radians relative to right (like SVG).
-		this.startAngleRad = startAngleRad = (paneOptions.startAngle - 90) * Math.PI / 180;
-		this.endAngleRad = endAngleRad = (pick(paneOptions.endAngle, paneOptions.startAngle + 360)  - 90) * Math.PI / 180;
+		this.angleRad = (options.angle || 0) * Math.PI / 180; // Y axis in polar charts
+		this.startAngleRad = (paneOptions.startAngle - 90) * Math.PI / 180; // Gauges
+		this.endAngleRad = (pick(paneOptions.endAngle, paneOptions.startAngle + 360)  - 90) * Math.PI / 180; // Gauges
 		this.offset = options.offset || 0;
 
 		this.isCircular = isCircular;
 
-		// Automatically connect grid lines?
-		if (isCircular && userOptions.max === UNDEFINED && endAngleRad - startAngleRad === 2 * Math.PI) {
-			this.autoConnect = true;
-		}
 	}
 
 });
@@ -476,7 +517,7 @@ wrap(tickProto, 'getLabelPosition', function (proceed, x, y, label, horiz, label
 		align = labelOptions.align,
 		angle = ((axis.translate(this.pos) + axis.startAngleRad + Math.PI / 2) / Math.PI * 180) % 360;
 
-	if (axis.isRadial) {
+	if (axis.isRadial) { // Both X and Y axes in a polar chart
 		ret = axis.getPosition(this.pos, (axis.center[2] / 2) + pick(labelOptions.distance, -25));
 
 		// Automatically rotated
@@ -492,7 +533,7 @@ wrap(tickProto, 'getLabelPosition', function (proceed, x, y, label, horiz, label
 
 		// Automatic alignment
 		if (align === null) {
-			if (axis.isCircular) {
+			if (axis.isCircular) { // Y axis
 				if (this.label.getBBox().width > axis.len * axis.tickInterval / (axis.max - axis.min)) { // #3506
 					centerSlot = 0;
 				}

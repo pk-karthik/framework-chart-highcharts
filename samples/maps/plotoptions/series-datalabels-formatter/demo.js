@@ -8,13 +8,13 @@ $(function () {
         });
 
         // Instanciate the map
-        $('#container').highcharts('Map', {
-            chart : {
-                borderWidth : 1
+        Highcharts.mapChart('container', {
+            chart: {
+                borderWidth: 1
             },
 
-            title : {
-                text : 'Data label formatter to show value conditionally'
+            title: {
+                text: 'Data label formatter to show value conditionally'
             },
 
             legend: {
@@ -39,8 +39,8 @@ $(function () {
                 ]
             },
 
-            series : [{
-                data : data,
+            series: [{
+                data: data,
                 mapData: Highcharts.maps['countries/us/us-all'],
                 joinBy: 'hasc',
                 dataLabels: {

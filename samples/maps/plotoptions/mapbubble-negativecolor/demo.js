@@ -2,17 +2,18 @@ $(function () {
 
     $.getJSON('https://www.highcharts.com/samples/data/jsonp.php?filename=world-population.json&callback=?', function (data) {
 
-        $('#container').highcharts('Map', {
-            chart : {
-                borderWidth : 1
+        Highcharts.mapChart('container', {
+            chart: {
+                borderWidth: 1,
+                map: 'custom/world'
             },
 
             title: {
                 text: 'World population 2010 by country'
             },
 
-            subtitle : {
-                text : 'Negative color demo. Red bubbles are smaller than the UK.'
+            subtitle: {
+                text: 'Negative color demo. Red bubbles are smaller than the UK.'
             },
 
             legend: {
@@ -26,16 +27,14 @@ $(function () {
                 }
             },
 
-            series : [{
+            series: [{
                 name: 'Countries',
-                mapData: Highcharts.maps['custom/world'],
                 color: '#E0E0E0',
                 enableMouseTracking: false
             }, {
                 type: 'mapbubble',
                 negativeColor: '#FF0022',
                 zThreshold: 62036,
-                mapData: Highcharts.maps['custom/world'],
                 joinBy: ['iso-a2', 'code'],
                 data: data,
                 name: 'Population 2010',

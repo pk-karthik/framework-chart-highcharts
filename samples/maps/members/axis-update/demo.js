@@ -1,12 +1,12 @@
 $(function () {
-
+    var chart;
     $.getJSON('https://www.highcharts.com/samples/data/jsonp.php?filename=world-population-density.json&callback=?', function (data) {
 
         // Initiate the chart
-        $('#container').highcharts('Map', {
+        chart = Highcharts.mapChart('container', {
 
-            title : {
-                text : 'Update the color axis'
+            title: {
+                text: 'Update the color axis'
             },
 
             colorAxis: {
@@ -14,17 +14,18 @@ $(function () {
                 max: 1000,
                 type: 'logarithmic',
                 minColor: '#FFFFFF',
-                maxColor: '#000000'
+                maxColor: '#000000',
+                tickPixelInterval: 100
             },
 
-            series : [{
-                data : data,
+            series: [{
+                data: data,
                 mapData: Highcharts.maps['custom/world'],
                 joinBy: ['iso-a2', 'code'],
                 name: 'Population density',
                 states: {
                     hover: {
-                        color: '#BADA55'
+                        color: '#a4edba'
                     }
                 },
                 tooltip: {
@@ -38,7 +39,7 @@ $(function () {
         log = true;
 
     $('#update-color').click(function () {
-        var colorAxis = $('#container').highcharts().colorAxis[0];
+        var colorAxis = chart.colorAxis[0];
 
         colorAxis.update({
             maxColor: blackAndWhite ? '#980043' : '#000000'
@@ -47,7 +48,7 @@ $(function () {
     });
 
     $('#update-linlog').click(function () {
-        var colorAxis = $('#container').highcharts().colorAxis[0];
+        var colorAxis = chart.colorAxis[0];
 
         colorAxis.update({
             type: log ? 'linear' : 'logarithmic'

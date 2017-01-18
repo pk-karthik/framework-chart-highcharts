@@ -1,5 +1,5 @@
 $(function () {
-    $('#container').highcharts({
+    Highcharts.chart('container', {
         xAxis: {
             tickmarkPlacement: 'on',
             type: 'datetime',
@@ -14,6 +14,9 @@ $(function () {
             column: {
                 pointPlacement: 'between'
             }
+        },
+        tooltip: {
+            shared: true
         },
         series: [{
 

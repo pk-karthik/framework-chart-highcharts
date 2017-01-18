@@ -4,7 +4,7 @@ $(function () {
      */
     function afterSetExtremes(e) {
 
-        var chart = $('#container').highcharts();
+        var chart = Highcharts.charts[0];
 
         chart.showLoading('Loading data from server...');
         $.getJSON('https://www.highcharts.com/samples/data/from-sql.php?start=' + Math.round(e.min) +
@@ -22,16 +22,16 @@ $(function () {
         data = [].concat(data, [[Date.UTC(2011, 9, 14, 19, 59), null, null, null, null]]);
 
         // create the chart
-        $('#container').highcharts('StockChart', {
-            chart : {
+        Highcharts.stockChart('container', {
+            chart: {
                 type: 'candlestick',
                 zoomType: 'x'
             },
 
-            navigator : {
+            navigator: {
                 adaptToUpdatedData: false,
-                series : {
-                    data : data
+                series: {
+                    data: data
                 }
             },
 
@@ -47,7 +47,7 @@ $(function () {
                 text: 'Displaying 1.7 million data points in Highcharts Stock by async server loading'
             },
 
-            rangeSelector : {
+            rangeSelector: {
                 buttons: [{
                     type: 'hour',
                     count: 1,
@@ -69,12 +69,12 @@ $(function () {
                     text: 'All'
                 }],
                 inputEnabled: false, // it supports only days
-                selected : 4 // all
+                selected: 4 // all
             },
 
-            xAxis : {
-                events : {
-                    afterSetExtremes : afterSetExtremes
+            xAxis: {
+                events: {
+                    afterSetExtremes: afterSetExtremes
                 },
                 minRange: 3600 * 1000 // one hour
             },
@@ -83,8 +83,8 @@ $(function () {
                 floor: 0
             },
 
-            series : [{
-                data : data,
+            series: [{
+                data: data,
                 dataGrouping: {
                     enabled: false
                 }

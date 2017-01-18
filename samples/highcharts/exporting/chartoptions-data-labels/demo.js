@@ -1,5 +1,5 @@
 $(function () {
-    $('#container').highcharts({
+    Highcharts.chart('container', {
 
         chart: {
             type: 'column'
@@ -7,7 +7,7 @@ $(function () {
         title: {
             text: 'Data labels only visible on export'
         },
-        
+
         xAxis: {
             categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
         },

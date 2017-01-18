@@ -1,8 +1,35 @@
+/**
+ * (c) 2010-2016 Torstein Honsi
+ *
+ * License: www.highcharts.com/license
+ */
+'use strict';
+import H from './Globals.js';
+import './Utilities.js';
+import './Axis.js';
+import './Series.js';
+import './Tooltip.js';
+var arrayMax = H.arrayMax,
+	arrayMin = H.arrayMin,
+	Axis = H.Axis,
+	defaultPlotOptions = H.defaultPlotOptions,
+	defined = H.defined,
+	each = H.each,
+	extend = H.extend,
+	format = H.format,
+	isNumber = H.isNumber,
+	merge = H.merge,
+	pick = H.pick,
+	Point = H.Point,
+	Series = H.Series,
+	Tooltip = H.Tooltip,
+	wrap = H.wrap;
+	
 /* ****************************************************************************
  * Start data grouping module												 *
  ******************************************************************************/
-var DATA_GROUPING = 'dataGrouping',
-	seriesProto = Series.prototype,
+
+var seriesProto = Series.prototype,
 	baseProcessData = seriesProto.processData,
 	baseGeneratePoints = seriesProto.generatePoints,
 	baseDestroy = seriesProto.destroy,
@@ -57,7 +84,7 @@ var DATA_GROUPING = 'dataGrouping',
 	},
 
 	// units are defined in a separate array to allow complete overriding in case of a user option
-	defaultDataGroupingUnits = [
+	defaultDataGroupingUnits = H.defaultDataGroupingUnits = [
 		[
 			'millisecond', // unit name
 			[1, 2, 5, 10, 20, 25, 50, 100, 200, 500] // allowed multiples
@@ -125,16 +152,16 @@ var DATA_GROUPING = 'dataGrouping',
 			return ret;
 		},
 		open: function (arr) {
-			return arr.length ? arr[0] : (arr.hasNulls ? null : UNDEFINED);
+			return arr.length ? arr[0] : (arr.hasNulls ? null : undefined);
 		},
 		high: function (arr) {
-			return arr.length ? arrayMax(arr) : (arr.hasNulls ? null : UNDEFINED);
+			return arr.length ? arrayMax(arr) : (arr.hasNulls ? null : undefined);
 		},
 		low: function (arr) {
-			return arr.length ? arrayMin(arr) : (arr.hasNulls ? null : UNDEFINED);
+			return arr.length ? arrayMin(arr) : (arr.hasNulls ? null : undefined);
 		},
 		close: function (arr) {
-			return arr.length ? arr[arr.length - 1] : (arr.hasNulls ? null : UNDEFINED);
+			return arr.length ? arr[arr.length - 1] : (arr.hasNulls ? null : undefined);
 		},
 		// ohlc and range are special cases where a multidimensional array is input and an array is output
 		ohlc: function (open, high, low, close) {
@@ -199,13 +226,14 @@ seriesProto.groupData = function (xData, yData, groupPositions, approximation) {
 
 			// get group x and y
 			pointX = groupPositions[pos];
-			groupedY = approximationFn.apply(0, values);
+			series.dataGroupInfo = { start: start, length: values[0].length };
+			groupedY = approximationFn.apply(series, values);
 
 			// push the grouped data
-			if (groupedY !== UNDEFINED) {
+			if (groupedY !== undefined) {
 				groupedXData.push(pointX);
 				groupedYData.push(groupedY);
-				groupMap.push({ start: start, length: values[0].length });
+				groupMap.push(series.dataGroupInfo);
 			}
 
 			// reset the aggregate arrays
@@ -268,8 +296,10 @@ seriesProto.processData = function () {
 	var series = this,
 		chart = series.chart,
 		options = series.options,
-		dataGroupingOptions = options[DATA_GROUPING],
-		groupingEnabled = series.allowDG !== false && dataGroupingOptions && pick(dataGroupingOptions.enabled, chart.options._stock),
+		dataGroupingOptions = options.dataGrouping,
+		groupingEnabled = series.allowDG !== false && dataGroupingOptions &&
+			pick(dataGroupingOptions.enabled, chart.options.isStock),
+		visible = series.visible || !chart.options.chart.ignoreHiddenSeries,
 		hasGroupedData,
 		skip;
 
@@ -278,8 +308,9 @@ seriesProto.processData = function () {
 	series.groupPixelWidth = null; // #2110
 	series.hasProcessed = true; // #2692
 
-	// skip if processData returns false or if grouping is disabled (in that order)
-	skip = baseProcessData.apply(series, arguments) === false || !groupingEnabled;
+	// skip if processData returns false or if grouping is disabled (in that order) or #5493
+	skip = baseProcessData.apply(series, arguments) === false ||
+		!groupingEnabled || !visible;
 	if (!skip) {
 		series.destroyGroupedData();
 
@@ -295,7 +326,7 @@ seriesProto.processData = function () {
 		if (groupPixelWidth) {
 			hasGroupedData = true;
 
-			series.points = null; // force recreation of point instances in series.translate
+			series.isDirty = true; // force recreation of point instances in series.translate, #5699
 
 			var extremes = xAxis.getExtremes(),
 				xMin = extremes.min,
@@ -377,24 +408,36 @@ seriesProto.generatePoints = function () {
 };
 
 /**
+ * Override point prototype to throw a warning when trying to update grouped points
+ */
+wrap(Point.prototype, 'update', function (proceed) {
+	if (this.dataGroup) {
+		H.error(24);
+	} else {
+		proceed.apply(this, [].slice.call(arguments, 1));
+	}
+});
+
+/**
  * Extend the original method, make the tooltip's header reflect the grouped range
  */
-wrap(Tooltip.prototype, 'tooltipFooterHeaderFormatter', function (proceed, point, isFooter) {
+wrap(Tooltip.prototype, 'tooltipFooterHeaderFormatter', function (proceed, labelConfig, isFooter) {
 	var tooltip = this,
-		series = point.series,
+		series = labelConfig.series,
 		options = series.options,
 		tooltipOptions = series.tooltipOptions,
 		dataGroupingOptions = options.dataGrouping,
 		xDateFormat = tooltipOptions.xDateFormat,
 		xDateFormatEnd,
 		xAxis = series.xAxis,
+		dateFormat = H.dateFormat,
 		currentDataGrouping,
 		dateTimeLabelFormats,
 		labelFormats,
 		formattedKey;
 
 	// apply only to grouped series
-	if (xAxis && xAxis.options.type === 'datetime' && dataGroupingOptions && isNumber(point.key)) {
+	if (xAxis && xAxis.options.type === 'datetime' && dataGroupingOptions && isNumber(labelConfig.key)) {
 
 		// set variables
 		currentDataGrouping = series.currentDataGrouping;
@@ -413,25 +456,25 @@ wrap(Tooltip.prototype, 'tooltipFooterHeaderFormatter', function (proceed, point
 		// so if the least distance between points is one minute, show it, but if the
 		// least distance is one day, skip hours and minutes etc.
 		} else if (!xDateFormat && dateTimeLabelFormats) {
-			xDateFormat = tooltip.getXDateFormat(point, tooltipOptions, xAxis);
+			xDateFormat = tooltip.getXDateFormat(labelConfig, tooltipOptions, xAxis);
 		}
 
 		// now format the key
-		formattedKey = dateFormat(xDateFormat, point.key);
+		formattedKey = dateFormat(xDateFormat, labelConfig.key);
 		if (xDateFormatEnd) {
-			formattedKey += dateFormat(xDateFormatEnd, point.key + currentDataGrouping.totalRange - 1);
+			formattedKey += dateFormat(xDateFormatEnd, labelConfig.key + currentDataGrouping.totalRange - 1);
 		}
 
 		// return the replaced format
 		return format(tooltipOptions[(isFooter ? 'footer' : 'header') + 'Format'], {
-			point: extend(point, { key: formattedKey }),
+			point: extend(labelConfig.point, { key: formattedKey }),
 			series: series
 		});
 	
 	}
 
 	// else, fall back to the regular formatter
-	return proceed.call(tooltip, point, isFooter);
+	return proceed.call(tooltip, labelConfig, isFooter);
 });
 
 /**
@@ -473,7 +516,7 @@ wrap(seriesProto, 'setOptions', function (proceed, itemOptions) {
 		);
 	}
 
-	if (this.chart.options._stock) {
+	if (this.chart.options.isStock) {
 		this.requireSorting = true;
 	}
 
@@ -512,7 +555,7 @@ Axis.prototype.getGroupPixelWidth = function () {
 	while (i--) {
 		dgOptions = series[i].options.dataGrouping;
 		if (dgOptions) {
-			groupPixelWidth = mathMax(groupPixelWidth, dgOptions.groupPixelWidth);
+			groupPixelWidth = Math.max(groupPixelWidth, dgOptions.groupPixelWidth);
 
 		}
 	}

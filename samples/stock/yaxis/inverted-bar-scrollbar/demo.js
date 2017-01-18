@@ -1,5 +1,5 @@
-$(function() {
-    $('#container').highcharts({
+$(function () {
+    Highcharts.chart('container', {
         chart: {
             type: 'bar',
             marginLeft: 150

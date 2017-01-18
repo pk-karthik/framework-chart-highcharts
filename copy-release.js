@@ -12,6 +12,14 @@
         // Set this to true after changes have been reviewed
     var push = process.argv[2] === '-push';
 
+    function releaseRepo(product) {
+        return {
+            highcharts: 'highcharts-dist',
+            highmaps: 'highmaps-release',
+            highstock: 'highstock-release'
+        }[product];
+    }
+
     /**
      * Commit, tag and push
      */
@@ -26,7 +34,7 @@
             };
         */
         var commands = [
-            'cd ~/github/' + product + '-release',
+            'cd ~/github/' + releaseRepo(product),
             'git add --all',
             'git commit -m "v' + version + '"',
             'git tag -a "v' + version + '" -m "Tagged ' + product + ' version ' + version + '"',
@@ -62,14 +70,14 @@
         console.log('Updating bower.json and package.json for ' + name + '...');
 
         ['bower', 'package'].forEach(function (file ) {
-            fs.readFile('../' + product + '-release/' + file + '.json', function (err, json) {
+            fs.readFile('../' + releaseRepo(product) + '/' + file + '.json', function (err, json) {
                 if (err) {
                     throw err;
                 }
                 json = JSON.parse(json);
                 json.version = 'v' + version;
                 json = JSON.stringify(json, null, '  ');
-                fs.writeFile('../' + product + '-release/' + file + '.json', json, proceed);
+                fs.writeFile('../' + releaseRepo(product) + '/' + file + '.json', json, proceed);
             });
         });
     }
@@ -83,16 +91,16 @@
         console.log('Copying ' + name + ' files...');
 
         // Copy the files over to shim repo
-        fs.readdir('build/dist/' + product + '/js/', function (err, files) {
+        fs.readdir('build/dist/' + product + '/code/', function (err, files) {
             if (err) {
                 throw err;
             }
 
             files.forEach(function (src) {
-                if (src.indexOf('.') !== 0) {
+                if ((src.indexOf('.') !== 0) && (src.indexOf('readme') === -1)){
                     fs.copy(
-                        'build/dist/' + product + '/js/' + src,
-                        '../' + product + '-release/' + src,
+                        'build/dist/' + product + '/code/' + src,
+                        '../' + releaseRepo(product) + '/' + src,
                         function (copyerr) {
                             if (copyerr) {
                                 throw copyerr;
@@ -112,15 +120,18 @@
         }
 
         extras.forEach(function (src) {
-            fs.copy(
-                'build/dist/' + product + '/js/' + src,
-                '../highcharts-release/' + src,
-                function (err) {
-                    if (err) {
-                        throw err;
+            ['', 'js/'].forEach(function (folder) {
+                var path = folder + src;
+                fs.copy(
+                    'build/dist/' + product + '/code/' + path,
+                    '../' + releaseRepo('highcharts') + '/' + path,
+                    function (err) {
+                        if (err) {
+                            throw err;
+                        }
                     }
-                }
-            );
+                );
+            });
         });
     }
 

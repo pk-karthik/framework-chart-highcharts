@@ -1,10 +1,9 @@
 $(function () {
     QUnit.test('Destroy in callback', function (assert) {
-        var chart,
-            newChart;
-        chart = new Highcharts.Chart({
+        var newChart;
+        Highcharts.chart('container', {
             chart: {
-                renderTo: 'container'
+                test: false
             },
             series: [{
                 animation: false,
@@ -12,8 +11,9 @@ $(function () {
             }]
         }, function () {
             var opts = this.options;
+            delete opts.chart.test; // run as normal
             this.destroy();
-            newChart = new Highcharts.Chart(opts);
+            newChart = Highcharts.chart('container', opts);
             newChart.setTitle({
                 text: 'New chart title'
             });

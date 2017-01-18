@@ -1,5 +1,5 @@
 $(function () {
-    $('#container').highcharts('StockChart', {
+    Highcharts.stockChart('container', {
 
         chart: {
             type: 'area'
@@ -11,7 +11,7 @@ $(function () {
 
         plotOptions: {
             series: {
-                gapSize: 2
+                gapSize: 1
             }
         },
 

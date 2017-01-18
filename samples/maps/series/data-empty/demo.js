@@ -1,13 +1,13 @@
 $(function () {
 
     // Initiate the chart
-    $('#container').highcharts('Map', {
+    Highcharts.mapChart('container', {
 
-        title : {
-            text : 'Empty map'
+        title: {
+            text: 'Empty map'
         },
 
-        series : [{
+        series: [{
             mapData: Highcharts.maps['custom/world'],
             name: 'World map'
         }]

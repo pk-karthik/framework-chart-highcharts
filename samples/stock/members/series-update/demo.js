@@ -18,27 +18,26 @@ $(function () {
         });
 
         // create the chart
-        $('#container').highcharts('StockChart', {
+        var chart = Highcharts.stockChart('container', {
 
 
-            rangeSelector : {
-                selected : 1
+            rangeSelector: {
+                selected: 1
             },
 
-            title : {
-                text : 'AAPL Stock Price'
+            title: {
+                text: 'AAPL Stock Price'
             },
 
-            series : [{
-                name : 'AAPL Stock Price',
-                data : data,
+            series: [{
+                name: 'AAPL Stock Price',
+                data: data,
                 threshold: null,
                 turboThreshold: 2000 // to accept point object configuration
             }]
         });
 
-        var chart = $('#container').highcharts(),
-            enableMarkers = true,
+        var enableMarkers = true,
             color = false;
 
         // Toggle point markers

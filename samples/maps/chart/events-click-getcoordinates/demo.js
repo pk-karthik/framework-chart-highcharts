@@ -3,7 +3,7 @@ function showMap(mapKey) {
     var supportsLatLon = !!Highcharts.maps[mapKey]['hc-transform'];
 
     // Initiate the chart
-    $('#container').highcharts('Map', {
+    Highcharts.mapChart('container', {
 
         chart: {
             events: {
@@ -25,7 +25,7 @@ function showMap(mapKey) {
         },
 
         title: {
-            text : 'Draw your own points or lines'
+            text: 'Draw your own points or lines'
         },
 
         subtitle: supportsLatLon ? {} : {
@@ -57,7 +57,7 @@ function showMap(mapKey) {
                 point: {
                     events: {
                         // Update lat/lon properties after dragging point
-                        drop: function (e) {
+                        drop: function () {
                             var newLatLon;
                             if (supportsLatLon) {
                                 newLatLon = this.series.chart.fromPointToLatLon(this);
@@ -121,9 +121,8 @@ $(function () {
 
     showMap('custom/world');
 
-
     $('#getconfig').click(function () {
-        var chart = $('#container').highcharts(),
+        var chart = Highcharts.charts[0],
             points,
             html = '';
 

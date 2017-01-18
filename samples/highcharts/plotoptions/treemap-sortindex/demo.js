@@ -1,12 +1,12 @@
 $(function () {
-    $('#container').highcharts({
+    Highcharts.chart('container', {
         series: [{
             type: 'treemap',
             layoutAlgorithm: 'stripes',
             alternateStartingDirection: true,
             levels: [{
                 level: 1,
-                borderWidth: '3px',
+                borderWidth: 3,
                 dataLabels: {
                     enabled: true,
                     align: 'left',

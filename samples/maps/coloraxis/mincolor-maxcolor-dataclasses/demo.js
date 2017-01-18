@@ -25,7 +25,7 @@ $(function () {
 
 
             // Initiate the chart
-            $('#container').highcharts('Map', {
+            Highcharts.mapChart('container', {
                 chart: {
                     borderWidth: 1
                 },
@@ -77,14 +77,14 @@ $(function () {
                     maxColor: '#990041'
                 },
 
-                series : [{
-                    data : data,
+                series: [{
+                    data: data,
                     mapData: Highcharts.maps['custom/world'],
                     joinBy: ['iso-a2', 'code'],
                     name: 'Population density',
                     states: {
                         hover: {
-                            color: '#BADA55'
+                            color: '#a4edba'
                         }
                     },
                     tooltip: {

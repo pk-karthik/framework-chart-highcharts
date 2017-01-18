@@ -1,6 +1,5 @@
-var chart;
 $(function () {
-    $('#container').highcharts({
+    Highcharts.chart('container', {
         chart: {
             zoomType: 'x'
         },

@@ -63,12 +63,12 @@ $(function () {
     // Initiate the chart
     $('#container').highcharts('Map', {
 
-        title : {
-            text : 'Highmaps basic demo'
+        title: {
+            text: 'Highmaps basic demo'
         },
 
-        subtitle : {
-            text : 'Source map: <a href="https://code.highcharts.com/mapdata/custom/oceania.js">Oceania</a>'
+        subtitle: {
+            text: 'Source map: <a href="https://code.highcharts.com/mapdata/custom/oceania.js">Oceania</a>'
         },
 
         mapNavigation: {
@@ -82,14 +82,14 @@ $(function () {
             min: 0
         },
 
-        series : [{
-            data : data,
+        series: [{
+            data: data,
             mapData: Highcharts.maps['custom/oceania'],
             joinBy: 'hc-key',
             name: 'Random data',
             states: {
                 hover: {
-                    color: '#BADA55'
+                    color: '#a4edba'
                 }
             },
             dataLabels: {

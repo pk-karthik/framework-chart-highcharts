@@ -1,5 +1,5 @@
 $(function () {
-    $('#container').highcharts({
+    Highcharts.chart('container', {
         chart: {
             type: 'line'
         },
@@ -10,7 +10,7 @@ $(function () {
         xAxis: {
             categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
         },
-        
+
         legend: {
             layout: 'vertical',
             floating: true,

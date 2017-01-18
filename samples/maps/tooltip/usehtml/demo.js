@@ -8,7 +8,7 @@ $(function () {
         });
 
         // Initiate the chart
-        $('#container').highcharts('Map', {
+        Highcharts.mapChart('container', {
 
             title: {
                 text: 'Full HTML tooltip'
@@ -42,14 +42,14 @@ $(function () {
                 type: 'logarithmic'
             },
 
-            series : [{
-                data : data,
+            series: [{
+                data: data,
                 mapData: Highcharts.maps['custom/world'],
                 joinBy: ['iso-a2', 'code'],
                 name: 'Population density',
                 states: {
                     hover: {
-                        color: '#BADA55'
+                        color: '#a4edba'
                     }
                 }
             }]

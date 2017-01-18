@@ -25,9 +25,9 @@ $(function () {
 
 
             // Initiate the chart
-            $('#container').highcharts('Map', {
-                title : {
-                    text : 'Named data classes'
+            Highcharts.mapChart('container', {
+                title: {
+                    text: 'Named data classes'
                 },
 
                 mapNavigation: {
@@ -62,8 +62,8 @@ $(function () {
                     }]
                 },
 
-                series : [{
-                    data : data,
+                series: [{
+                    data: data,
                     mapData: Highcharts.maps['custom/world'],
                     joinBy: ['iso-a2', 'code'],
                     name: 'Population density',

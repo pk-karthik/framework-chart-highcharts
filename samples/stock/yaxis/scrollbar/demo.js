@@ -1,6 +1,6 @@
 $(function () {
-    $.getJSON('https://www.highcharts.com/samples/data/jsonp.php?filename=large-dataset.json&callback=?', function(data) {
-        $('#container').highcharts('StockChart', {
+    $.getJSON('https://www.highcharts.com/samples/data/jsonp.php?filename=large-dataset.json&callback=?', function (data) {
+        Highcharts.stockChart('container', {
             chart: {
                 zoomType: 'xy'
             },
